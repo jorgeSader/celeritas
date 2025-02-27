@@ -3,6 +3,7 @@ package celeritas
 import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
+	"github.com/jorgeSader/celeritas/render"
 	"log"
 	"net/http"
 	"os"
@@ -23,6 +24,7 @@ type Celeritas struct {
 	InfoLog  *log.Logger
 	RootPath string
 	Routes   *chi.Mux
+	Render   *render.Render
 	config   config
 }
 
@@ -76,6 +78,9 @@ func (c *Celeritas) New(rootPath string) error {
 		port:     os.Getenv("PORT"),
 		renderer: os.Getenv("RENDERER"),
 	}
+
+	c.Render = c.createRenderer(c)
+
 	return nil
 }
 
@@ -126,4 +131,13 @@ func (c *Celeritas) startLoggers() (*log.Logger, *log.Logger, error) {
 	infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog = log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 	return infoLog, errorLog, nil
+}
+
+func (c *Celeritas) createRenderer(cel *Celeritas) *render.Render {
+	myRenderer := render.Render{
+		RootPath: cel.RootPath,
+		Renderer: cel.config.renderer,
+		Port:     cel.config.port,
+	}
+	return &myRenderer
 }

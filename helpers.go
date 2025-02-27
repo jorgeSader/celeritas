@@ -1,7 +1,6 @@
 package celeritas
 
 import (
-	"log"
 	"os"
 )
 
@@ -32,14 +31,4 @@ func (c *Celeritas) CreateFileIfNotExists(path string) error {
 		}(file)
 	}
 	return nil
-}
-
-// startLoggers initializes info and error loggers with timestamps and file info for errors.
-func (c *Celeritas) startLoggers() (*log.Logger, *log.Logger, error) {
-	var infoLog *log.Logger
-	var errorLog *log.Logger
-
-	infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-	errorLog = log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
-	return infoLog, errorLog, nil
 }

@@ -2,9 +2,12 @@ package celeritas
 
 import (
 	"fmt"
+	"github.com/go-chi/chi/v5"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -19,6 +22,7 @@ type Celeritas struct {
 	ErrorLog *log.Logger
 	InfoLog  *log.Logger
 	RootPath string
+	Routes   *chi.Mux
 	config   config
 }
 
@@ -66,6 +70,7 @@ func (c *Celeritas) New(rootPath string) error {
 	}
 	c.Version = version
 	c.RootPath = rootPath
+	c.Routes = c.routes().(*chi.Mux)
 
 	c.config = config{
 		port:     os.Getenv("PORT"),
@@ -87,6 +92,23 @@ func (c *Celeritas) Init(p initPaths) error {
 	return nil
 }
 
+// ListenAndServe Starts the webserver
+func (c *Celeritas) ListenAndServe() {
+	srv := &http.Server{
+		Addr:         ":" + c.config.port,
+		ErrorLog:     c.ErrorLog,
+		Handler:      c.routes(),
+		IdleTimeout:  30 * time.Second,
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 600 * time.Second,
+	}
+	c.InfoLog.Printf("Server listening on port %s", c.config.port)
+	err := srv.ListenAndServe()
+	if err != nil {
+		c.ErrorLog.Fatal(err)
+	}
+}
+
 // CheckDotEnv ensures a .env file exists at the specified path, creating it if necessary.
 func (c *Celeritas) CheckDotEnv(path string) error {
 	err := c.CreateFileIfNotExists(fmt.Sprintf("%s/.env", path))
@@ -94,4 +116,14 @@ func (c *Celeritas) CheckDotEnv(path string) error {
 		return err
 	}
 	return nil
+}
+
+// startLoggers initializes info and error loggers with timestamps and file info for errors.
+func (c *Celeritas) startLoggers() (*log.Logger, *log.Logger, error) {
+	var infoLog *log.Logger
+	var errorLog *log.Logger
+
+	infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errorLog = log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+	return infoLog, errorLog, nil
 }

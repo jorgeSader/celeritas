@@ -30,7 +30,7 @@ type TemplaData struct {
 func (c *Render) Page(w http.ResponseWriter, r *http.Request, view string, variables, data interface{}) error {
 	switch strings.ToLower(c.Renderer) {
 	case "go":
-		return GoPage(w, r, view, data)
+		return c.GoPage(w, r, view, data)
 	case "jet":
 
 	}

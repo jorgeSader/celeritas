@@ -69,7 +69,7 @@ func (c *Render) JetPage(w http.ResponseWriter, r *http.Request, templateName st
 	if variables == nil {
 		vars = make(jet.VarMap)
 	} else {
-		vars = jet.VarMap(vars)
+		vars = variables.(jet.VarMap)
 	}
 
 	td := &TemplaData{}

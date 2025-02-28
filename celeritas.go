@@ -90,6 +90,7 @@ func (c *Celeritas) New(rootPath string) error {
 			lifeTime: os.Getenv("COOKIE_LIFETIME"),
 			persist:  os.Getenv("COOKIE_PERSIST"),
 			secure:   os.Getenv("COOKIE_SECURE"),
+			domain:   os.Getenv("COOKIE_DOMAIN"),
 		},
 		sessionType: os.Getenv("SESSION_TYPE"),
 	}
@@ -100,6 +101,7 @@ func (c *Celeritas) New(rootPath string) error {
 		CookieLifetime: c.config.cookie.lifeTime,
 		CookiePersist:  c.config.cookie.persist,
 		CookieSecure:   c.config.cookie.secure,
+		CookieDomain:   c.config.cookie.domain,
 		SessionType:    c.config.sessionType,
 	}
 

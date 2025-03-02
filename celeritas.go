@@ -165,6 +165,9 @@ func (c *Celeritas) ListenAndServe() {
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 600 * time.Second,
 	}
+
+	defer c.DB.Pool.Close()
+
 	c.InfoLog.Printf("Server listening on port %s", c.config.port)
 	err := srv.ListenAndServe()
 	if err != nil {

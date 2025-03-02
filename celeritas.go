@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/CloudyKit/jet/v6"
@@ -30,6 +31,7 @@ type Celeritas struct {
 	Routes   *chi.Mux
 	Render   *render.Render
 	Session  *scs.SessionManager
+	DB       Database
 	JetViews *jet.Set
 	config   config
 }
@@ -40,6 +42,7 @@ type config struct {
 	renderer    string
 	cookie      cookieConfig
 	sessionType string
+	database    databaseConfig
 }
 
 // New initializes a new Celeritas instance with the given root path.
@@ -72,6 +75,21 @@ func (c *Celeritas) New(rootPath string) error {
 		return err
 	}
 
+	// connect to database
+	dbType := os.Getenv("DATABASE_TYPE")
+	if dbType != "" {
+		db, err := c.OpenDB(dbType, c.BuildDSN())
+		if err != nil {
+			errorLog.Println(err)
+			os.Exit(1)
+		}
+		c.DB = Database{
+			DataType: dbType,
+			Pool:     db,
+		}
+
+	}
+
 	c.InfoLog = infoLog
 	c.ErrorLog = errorLog
 	c.Debug, err = strconv.ParseBool(os.Getenv("DEBUG"))
@@ -93,9 +111,14 @@ func (c *Celeritas) New(rootPath string) error {
 			domain:   os.Getenv("COOKIE_DOMAIN"),
 		},
 		sessionType: os.Getenv("SESSION_TYPE"),
+
+		database: databaseConfig{
+			database: dbType,
+			dsn:      c.BuildDSN(),
+		},
 	}
 
-	// TODO create session
+	// create session
 	sess := session.Session{
 		CookieName:     c.config.cookie.name,
 		CookieLifetime: c.config.cookie.lifeTime,
@@ -176,4 +199,30 @@ func (c *Celeritas) createRenderer() {
 		JetViews: c.JetViews,
 	}
 	c.Render = &myRenderer
+}
+
+func (c *Celeritas) BuildDSN() string {
+	var dsn string
+
+	dbType := strings.ToLower(os.Getenv("DATABASE_TYPE"))
+
+	switch dbType {
+	case "postgres", "postgresql":
+		dsn = fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=%s timezone=UTC connect_timeout=5",
+			os.Getenv("DATABASE_HOST"),
+			os.Getenv("DATABASE_PORT"),
+			os.Getenv("DATABASE_USER"),
+			os.Getenv("DATABASE_NAME"),
+			os.Getenv("DATABASE_SSL_MODE"))
+
+		if os.Getenv("DATABASE_PASS") != "" {
+			dsn = fmt.Sprintf("%s password=%s", dsn, os.Getenv("DATABASE_PASS"))
+		}
+
+	case "mariadb", "mysql":
+
+	default:
+
+	}
+	return dsn
 }

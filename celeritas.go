@@ -200,6 +200,7 @@ func (c *Celeritas) createRenderer() {
 		Renderer: c.config.renderer,
 		Port:     c.config.port,
 		JetViews: c.JetViews,
+		Session:  c.Session,
 	}
 	c.Render = &myRenderer
 }

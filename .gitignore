@@ -11,7 +11,6 @@ celeritas
 
 # Output of the go coverage tool
 *.out
-*.diff
 
 # Dependency directories (uncomment if needed)
 # vendor/
@@ -33,3 +32,7 @@ database.yml
 # Runtime dirs
 logs/
 tmp/
+
+# Dev helpers
+*.diff
+CHANGES.md

@@ -25,13 +25,18 @@ build_cli:
 .PHONY: stage-all
 stage-all:
 	@echo "Staging all files..."
-	git add .
+	@git add .
 	@echo "All files staged!"
 
-.PHONY: diff
-diff:
+.PHONY: unstage-all
+unstage-all:
+	@echo "Unstaging all files..."
+	@git restore --staged .
+	@echo "All files unstaged!"
+
+.PHONY: diff-to-clipboard
+diff-to-clipboard:
 	@echo "Copying diff to clipboard..."
-	@# Detect OS and use appropriate clipboard tool
 	@if [ "$$(uname)" = "Darwin" ]; then \
 		git diff --staged | pbcopy; \
 		echo "Diff copied to clipboard (macOS)"; \
@@ -54,6 +59,13 @@ diff:
 		exit 1; \
 	fi
 
-.PHONY: diff-all
-diff-all: stage-all diff
-	@echo "Staged all modified files and copied diff to clipboard."
+.PHONY: diff
+diff: stage-all diff-to-clipboard  unstage-all
+	@echo "DIff content on clipboard and ready to paste."
+
+.PHONY: diff-file
+diff-file: stage-all
+	@echo "Saving diff to diff_output.txt..."
+	@git diff --staged > diff_output.txt
+	@echo "Diff saved to diff_output.txt."
+	@$(MAKE) unstage-all

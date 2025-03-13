@@ -19,4 +19,4 @@
 -- CREATE TRIGGER set_timestamp
 --     BEFORE UPDATE ON some_table
 --     FOR EACH ROW
---     EXECUTE PROCEDURE trigger_set_timestamp()
+--     EXECUTE PROCEDURE trigger_set_timestamp();

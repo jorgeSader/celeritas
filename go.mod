@@ -4,11 +4,16 @@ go 1.23.6
 
 require (
 	github.com/CloudyKit/jet/v6 v6.3.1
+	github.com/alexedwards/scs/mysqlstore v0.0.0-20250212122300-421ef1d8611c
+	github.com/alexedwards/scs/postgresstore v0.0.0-20250212122300-421ef1d8611c
+	github.com/alexedwards/scs/sqlite3store v0.0.0-20250212122300-421ef1d8611c
 	github.com/alexedwards/scs/v2 v2.8.0
 	github.com/fatih/color v1.18.0
+	github.com/gertd/go-pluralize v0.2.1
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/go-sql-driver/mysql v1.9.0
 	github.com/golang-migrate/migrate/v4 v4.18.2
+	github.com/iancoleman/strcase v0.3.0
 	github.com/jackc/pgx/v5 v5.7.2
 	github.com/joho/godotenv v1.5.1
 )
@@ -17,11 +22,9 @@ require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/CloudyKit/fastprinter v0.0.0-20200109182630-33d98a066a53 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
-	github.com/gertd/go-pluralize v0.2.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/iancoleman/strcase v0.3.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect

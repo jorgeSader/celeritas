@@ -13,12 +13,12 @@ func doAuth(arg1, arg2 string) error {
 	upFile := cel.RootPath + "/migrations/" + fileName + ".up.sql"
 	downFile := cel.RootPath + "/migrations/" + fileName + ".down.sql"
 
-	err := copyFileFromTemplate("templates/migrations/auth_tables."+dbType+".up.sql", upFile)
+	err := copyFileFromTemplate("templates/migrations/auth_tables."+dbType+".sql", upFile)
 	if err != nil {
 		exitGracefully(err)
 	}
 
-	err = copyFileFromTemplate("templates/migrations/auth_tables."+dbType+".down.sql", downFile)
+	err = copyDataToFile([]byte("DROP TABLE IF EXISTS users CASCADE;\nDROP TABLE IF EXISTS tokens CASCADE;\nDROP TABLE IF EXISTS remember_tokens;"), downFile)
 	if err != nil {
 		exitGracefully(err)
 	}

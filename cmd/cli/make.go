@@ -3,7 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"strings"
 	"time"
+
+	"github.com/iancoleman/strcase"
 )
 
 func doMake(arg2, arg3 string) error {
@@ -28,11 +32,36 @@ func doMake(arg2, arg3 string) error {
 		if err != nil {
 			exitGracefully(err)
 		}
+
 	case "auth":
 		err := doAuth(arg2, arg3)
 		if err != nil {
 			exitGracefully(err)
 		}
+
+	case "handler":
+		if arg3 == "" {
+			exitGracefully(errors.New("handler name is required"))
+		}
+
+		fileName := cel.RootPath + "/handlers/" + strings.ToLower(arg3) + ".go"
+		if fileExists(fileName) {
+			exitGracefully(errors.New(fileName + " already exists"))
+		}
+
+		data, err := templateFS.ReadFile("templates/handlers/handler.go.txt")
+		if err != nil {
+			exitGracefully(err)
+		}
+
+		handler := string(data)
+		handler = strings.ReplaceAll(handler, "$HANDLERNAME$", strcase.ToCamel(arg3))
+
+		err = ioutil.WriteFile(fileName, []byte(handler), 0644)
+		if err != nil {
+			exitGracefully(err)
+		}
+
 	}
 	return nil
 }

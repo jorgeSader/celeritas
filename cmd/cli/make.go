@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/gertd/go-pluralize"
 	"io/ioutil"
 	"strings"
 	"time"
@@ -62,6 +63,43 @@ func doMake(arg2, arg3 string) error {
 			exitGracefully(err)
 		}
 
+	case "model":
+		if arg3 == "" {
+			exitGracefully(errors.New("model name is required"))
+		}
+		fileName := cel.RootPath + "/data/" + strings.ToLower(arg3) + ".go"
+		if fileExists(fileName) {
+			exitGracefully(errors.New(fileName + " already exists"))
+		}
+		data, err := templateFS.ReadFile("templates/data/model.go.txt")
+		if err != nil {
+			exitGracefully(err)
+		}
+		model := string(data)
+		plur := pluralize.NewClient()
+
+		var modelName = arg3
+		var tableName = arg3
+
+		if plur.IsPlural(arg3) {
+			modelName = plur.Singular(arg3)
+			tableName = strcase.ToSnake(modelName)
+		} else {
+			tableName = strcase.ToSnake(plur.Plural(arg3))
+		}
+
+		fileName = cel.RootPath + "/data/" + strings.ToLower(modelName) + ".go"
+		if fileExists(fileName) {
+			exitGracefully(errors.New(fileName + " already exists"))
+		}
+
+		model = strings.ReplaceAll(model, "$MODELNAME$", strcase.ToCamel(modelName))
+		model = strings.ReplaceAll(model, "$TABLENAME$", tableName)
+
+		err = copyDataToFile([]byte(model), fileName)
+		if err != nil {
+			exitGracefully(err)
+		}
 	}
 	return nil
 }

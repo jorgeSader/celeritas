@@ -1,11 +1,16 @@
 package session
 
 import (
+	"database/sql"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/alexedwards/scs/mysqlstore"
+	"github.com/alexedwards/scs/postgresstore"
+	//"github.com/alexedwards/scs/redisstore"
+	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
 )
 
@@ -16,6 +21,7 @@ type Session struct {
 	CookieName     string
 	CookieDomain   string
 	SessionType    string
+	BDPool         *sql.DB
 }
 
 func (c *Session) InitSession() *scs.SessionManager {
@@ -49,12 +55,16 @@ func (c *Session) InitSession() *scs.SessionManager {
 	// which session store?
 	switch strings.ToLower(c.SessionType) {
 	case "redis":
+		//session.Store = redisstore.New(c.BDPool)
 
 	case "mysql", "mariadb":
+		session.Store = mysqlstore.New(c.BDPool)
 
 	case "postgres", "postgresql":
+		session.Store = postgresstore.New(c.BDPool)
 
-	case "libsql", "turso", "tursodb":
+	case "sqlite", "sqlite3", "libsql", "turso", "tursodb":
+		session.Store = sqlite3store.New(c.BDPool)
 
 	default:
 		// cookie

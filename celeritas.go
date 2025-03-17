@@ -202,7 +202,18 @@ func (c *Celeritas) createRenderer() {
 		Port:     c.config.port,
 		JetViews: c.JetViews,
 		Session:  c.Session,
+		UseCache: false, // TODO: Enable caching by default and/or add to config file
 	}
+
+	// Initialize template cache for Go templates
+	if strings.ToLower(c.config.renderer) == "go" {
+		cache, err := myRenderer.CreateTemplateCache()
+		if err != nil {
+			c.ErrorLog.Fatalf("Failed to create template cache: %v", err)
+		}
+		myRenderer.TemplateCache = cache
+	}
+
 	c.Render = &myRenderer
 }
 

@@ -43,8 +43,10 @@ func (c *Render) defaultData(td *TemplateData, r *http.Request) *TemplateData {
 	td.ServerName = c.ServerName
 	td.Port = c.Port
 
-	if c.Session.Exists(r.Context(), "userID") {
-		td.IsAuthenticated = true
+	if c.Session != nil && r != nil {
+		if c.Session.Exists(r.Context(), "userID") {
+			td.IsAuthenticated = true
+		}
 	}
 	return td
 }

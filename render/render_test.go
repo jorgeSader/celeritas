@@ -1,8 +1,6 @@
 package render
 
 import (
-	"net/http"
-	"net/http/httptest"
 	"testing"
 )
 
@@ -22,17 +20,11 @@ var pageData = []struct {
 
 func TestRender_Page(t *testing.T) {
 	for _, e := range pageData {
-		r, err := http.NewRequest("GET", "/some-url", nil)
-		if err != nil {
-			t.Error(err)
-		}
-
-		w := httptest.NewRecorder()
-
+		r, w := setupTestRequest(t) // Call from setup_test.go
 		testRenderer.RootPath = "./test-data"
 		testRenderer.Renderer = e.renderer
 
-		err = testRenderer.Page(w, r, e.templateName, nil, nil)
+		err := testRenderer.Page(w, r, e.templateName, nil, nil)
 		if e.errorExpected {
 			if err == nil {
 				t.Errorf("%s: %s", e.name, e.errorMessage)
@@ -46,16 +38,10 @@ func TestRender_Page(t *testing.T) {
 }
 
 func TestRender_GoPage(t *testing.T) {
-	r, err := http.NewRequest("GET", "/some-url", nil)
-	if err != nil {
-		t.Error(err)
-	}
-
-	w := httptest.NewRecorder()
-
+	r, w := setupTestRequest(t) // Call from setup_test.go
 	testRenderer.Renderer = "go"
 
-	err = testRenderer.Page(w, r, "home", nil, nil)
+	err := testRenderer.Page(w, r, "home", nil, nil)
 	if err != nil {
 		t.Error("Error rendering go page", err)
 	}
@@ -63,20 +49,13 @@ func TestRender_GoPage(t *testing.T) {
 	if err == nil {
 		t.Error("Error rendering non-existent go template", err)
 	}
-
 }
 
 func TestRender_JetPage(t *testing.T) {
-	r, err := http.NewRequest("GET", "/some-url", nil)
-	if err != nil {
-		t.Error(err)
-	}
-
-	w := httptest.NewRecorder()
-
+	r, w := setupTestRequest(t) // Call from setup_test.go
 	testRenderer.Renderer = "jet"
 
-	err = testRenderer.Page(w, r, "home", nil, nil)
+	err := testRenderer.Page(w, r, "home", nil, nil)
 	if err != nil {
 		t.Error("Error rendering jet page", err)
 	}
@@ -84,5 +63,4 @@ func TestRender_JetPage(t *testing.T) {
 	if err == nil {
 		t.Error("Error rendering non-existent jet template", err)
 	}
-
 }

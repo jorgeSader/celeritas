@@ -3,16 +3,22 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/gertd/go-pluralize"
 	"io/ioutil"
 	"strings"
 	"time"
+
+	"github.com/fatih/color"
+	"github.com/gertd/go-pluralize"
 
 	"github.com/iancoleman/strcase"
 )
 
 func doMake(arg2, arg3 string) error {
 	switch arg2 {
+	case "key":
+		rnd := cel.RandomString(32)
+		color.Yellow("32 Character encryption key: %s", rnd)
+
 	case "migration":
 		dbType := cel.DB.DataType
 		if arg3 == "" {

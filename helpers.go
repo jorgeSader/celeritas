@@ -1,4 +1,4 @@
-package celeritas
+package devify
 
 import (
 	"crypto/aes"
@@ -19,7 +19,7 @@ const (
 // by selecting random indices based on prime numbers.
 // The parameter n specifies the desired length of the output string.
 // It returns the generated random string.
-func (c *Celeritas) RandomString(n int) string {
+func (d *Devify) RandomString(n int) string {
 	s, r := make([]rune, n), []rune(randomString)
 
 	for i := range s {
@@ -34,7 +34,7 @@ func (c *Celeritas) RandomString(n int) string {
 // The directory is created with permissions set to 0755 (rwxr-xr-x).
 // The parameter path specifies the directory location.
 // It returns an error if the directory cannot be created, or nil if successful or if the directory already exists.
-func (c *Celeritas) CreateDirIfNotExist(path string) error {
+func (d *Devify) CreateDirIfNotExist(path string) error {
 	const mode = 0o755
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		err := os.Mkdir(path, mode)
@@ -49,7 +49,7 @@ func (c *Celeritas) CreateDirIfNotExist(path string) error {
 // The parameter path specifies the file location.
 // It returns an error if the file cannot be created, or nil if successful or if the file already exists.
 // If the file is created, it is closed before the function returns.
-func (c *Celeritas) CreateFileIfNotExists(path string) error {
+func (d *Devify) CreateFileIfNotExists(path string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		file, err := os.Create(path)
 		if err != nil {

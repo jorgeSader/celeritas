@@ -1,4 +1,4 @@
-package celeritas
+package devify
 
 import (
 	"fmt"
@@ -13,17 +13,17 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/gomodule/redigo/redis"
-	"github.com/jorgeSader/celeritas/cache"
-	"github.com/jorgeSader/celeritas/render"
-	"github.com/jorgeSader/celeritas/session"
+	"github.com/jorgeSader/devify/cache"
+	"github.com/jorgeSader/devify/render"
+	"github.com/jorgeSader/devify/session"
 
 	"github.com/joho/godotenv"
 )
 
 const version = "1.0.0"
 
-// Celeritas is the main application struct that holds configuration and logging.
-type Celeritas struct {
+// Devify is the main application struct that holds configuration and logging.
+type Devify struct {
 	AppName       string
 	Debug         bool
 	Version       string
@@ -50,20 +50,20 @@ type config struct {
 	redis       redisConfig
 }
 
-// New initializes a new Celeritas instance with the given root path.
+// New initializes a new Devify instance with the given root path.
 // It sets up directories, loads environment variables, and configures loggers.
-func (c *Celeritas) New(rootPath string) error {
+func (d *Devify) New(rootPath string) error {
 	pathConfig := initPaths{
 		rootPath:    rootPath,
 		folderNames: []string{"handlers", "migrations", "views", "data", "public", "tmp", "logs", "middleware"},
 	}
 
-	err := c.Init(pathConfig)
+	err := d.Init(pathConfig)
 	if err != nil {
 		return err
 	}
 
-	err = c.CheckDotEnv(rootPath)
+	err = d.CheckDotEnv(rootPath)
 	if err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func (c *Celeritas) New(rootPath string) error {
 	}
 
 	// Create loggers for info and error output.
-	infoLog, errorLog, err := c.startLoggers()
+	infoLog, errorLog, err := d.startLoggers()
 	if err != nil {
 		return err
 	}
@@ -83,12 +83,12 @@ func (c *Celeritas) New(rootPath string) error {
 	// connect to database
 	dbType := os.Getenv("DATABASE_TYPE")
 	if dbType != "" {
-		db, err := c.OpenDB(dbType, c.BuildDSN())
+		db, err := d.OpenDB(dbType, d.BuildDSN())
 		if err != nil {
 			errorLog.Println(err)
 			os.Exit(1)
 		}
-		c.DB = Database{
+		d.DB = Database{
 			DataType: dbType,
 			Pool:     db,
 		}
@@ -96,21 +96,21 @@ func (c *Celeritas) New(rootPath string) error {
 	}
 
 	if strings.ToLower(os.Getenv("CACHE")) == "redis" {
-		myRedisCache := c.createClientRedisCache()
-		c.Cache = myRedisCache
+		myRedisCache := d.createClientRedisCache()
+		d.Cache = myRedisCache
 	}
 
-	c.InfoLog = infoLog
-	c.ErrorLog = errorLog
-	c.Debug, err = strconv.ParseBool(os.Getenv("DEBUG"))
+	d.InfoLog = infoLog
+	d.ErrorLog = errorLog
+	d.Debug, err = strconv.ParseBool(os.Getenv("DEBUG"))
 	if err != nil {
-		c.Debug = false // Default to false if DEBUG env var is invalid.
+		d.Debug = false // Default to false if DEBUG env var is invalid.
 	}
-	c.Version = version
-	c.RootPath = rootPath
-	c.Routes = c.routes().(*chi.Mux)
+	d.Version = version
+	d.RootPath = rootPath
+	d.Routes = d.routes().(*chi.Mux)
 
-	c.config = config{
+	d.config = config{
 		port:     os.Getenv("PORT"),
 		renderer: os.Getenv("RENDERER"),
 		cookie: cookieConfig{
@@ -124,7 +124,7 @@ func (c *Celeritas) New(rootPath string) error {
 
 		database: databaseConfig{
 			database: dbType,
-			dsn:      c.BuildDSN(),
+			dsn:      d.BuildDSN(),
 		},
 		redis: redisConfig{
 			host:     os.Getenv("REDIS_HOST"),
@@ -135,36 +135,36 @@ func (c *Celeritas) New(rootPath string) error {
 
 	// create session
 	sess := session.Session{
-		CookieName:     c.config.cookie.name,
-		CookieLifetime: c.config.cookie.lifeTime,
-		CookiePersist:  c.config.cookie.persist,
-		CookieSecure:   c.config.cookie.secure,
-		CookieDomain:   c.config.cookie.domain,
-		SessionType:    c.config.sessionType,
-		BDPool:         c.DB.Pool,
+		CookieName:     d.config.cookie.name,
+		CookieLifetime: d.config.cookie.lifeTime,
+		CookiePersist:  d.config.cookie.persist,
+		CookieSecure:   d.config.cookie.secure,
+		CookieDomain:   d.config.cookie.domain,
+		SessionType:    d.config.sessionType,
+		BDPool:         d.DB.Pool,
 	}
 
-	c.Session = sess.InitSession()
-	c.EncryptionKey = os.Getenv("ENCRYPTION_KEY")
+	d.Session = sess.InitSession()
+	d.EncryptionKey = os.Getenv("ENCRYPTION_KEY")
 
 	var views = jet.NewSet(
 		jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),
 		jet.InDevelopmentMode(),
 	)
 
-	c.JetViews = views
+	d.JetViews = views
 
-	c.createRenderer()
+	d.createRenderer()
 
 	return nil
 }
 
 // Init creates the necessary directory structure for the application based on the provided paths.
-func (c *Celeritas) Init(p initPaths) error {
+func (d *Devify) Init(p initPaths) error {
 	root := p.rootPath
 	for _, path := range p.folderNames {
 		// Create a folder if it doesn’t already exist.
-		err := c.CreateDirIfNotExist(root + "/" + path)
+		err := d.CreateDirIfNotExist(root + "/" + path)
 		if err != nil {
 			return err
 		}
@@ -173,28 +173,28 @@ func (c *Celeritas) Init(p initPaths) error {
 }
 
 // ListenAndServe Starts the webserver
-func (c *Celeritas) ListenAndServe() {
+func (d *Devify) ListenAndServe() {
 	srv := &http.Server{
-		Addr:         ":" + c.config.port,
-		ErrorLog:     c.ErrorLog,
-		Handler:      c.Routes,
+		Addr:         ":" + d.config.port,
+		ErrorLog:     d.ErrorLog,
+		Handler:      d.Routes,
 		IdleTimeout:  30 * time.Second,
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 600 * time.Second,
 	}
 
-	defer c.DB.Pool.Close()
+	defer d.DB.Pool.Close()
 
-	c.InfoLog.Printf("Server listening on port %s", c.config.port)
+	d.InfoLog.Printf("Server listening on port %s", d.config.port)
 	err := srv.ListenAndServe()
 	if err != nil {
-		c.ErrorLog.Fatal(err)
+		d.ErrorLog.Fatal(err)
 	}
 }
 
 // CheckDotEnv ensures a .env file exists at the specified path, creating it if necessary.
-func (c *Celeritas) CheckDotEnv(path string) error {
-	err := c.CreateFileIfNotExists(fmt.Sprintf("%s/.env", path))
+func (d *Devify) CheckDotEnv(path string) error {
+	err := d.CreateFileIfNotExists(fmt.Sprintf("%s/.env", path))
 	if err != nil {
 		return err
 	}
@@ -202,7 +202,7 @@ func (c *Celeritas) CheckDotEnv(path string) error {
 }
 
 // startLoggers initializes info and error loggers with timestamps and file info for errors.
-func (c *Celeritas) startLoggers() (*log.Logger, *log.Logger, error) {
+func (d *Devify) startLoggers() (*log.Logger, *log.Logger, error) {
 	var infoLog *log.Logger
 	var errorLog *log.Logger
 
@@ -211,45 +211,45 @@ func (c *Celeritas) startLoggers() (*log.Logger, *log.Logger, error) {
 	return infoLog, errorLog, nil
 }
 
-func (c *Celeritas) createRenderer() {
+func (d *Devify) createRenderer() {
 	myRenderer := render.Render{
-		RootPath: c.RootPath,
-		Renderer: c.config.renderer,
-		Port:     c.config.port,
-		JetViews: c.JetViews,
-		Session:  c.Session,
+		RootPath: d.RootPath,
+		Renderer: d.config.renderer,
+		Port:     d.config.port,
+		JetViews: d.JetViews,
+		Session:  d.Session,
 		UseCache: false, // TODO: Enable caching by default and/or add to config file
 	}
 
 	// Initialize template cache for Go templates
-	if strings.ToLower(c.config.renderer) == "go" {
+	if strings.ToLower(d.config.renderer) == "go" {
 		cache, err := myRenderer.CreateTemplateCache()
 		if err != nil {
-			c.ErrorLog.Fatalf("Failed to create template cache: %v", err)
+			d.ErrorLog.Fatalf("Failed to create template cache: %v", err)
 		}
 		myRenderer.TemplateCache = cache
 	}
 
-	c.Render = &myRenderer
+	d.Render = &myRenderer
 }
 
-func (c *Celeritas) createClientRedisCache() *cache.RedisCache {
+func (d *Devify) createClientRedisCache() *cache.RedisCache {
 	cacheClient := cache.RedisCache{
-		Conn:   c.createRedisPool(),
-		Prefix: c.config.redis.prefix,
+		Conn:   d.createRedisPool(),
+		Prefix: d.config.redis.prefix,
 	}
 	return &cacheClient
 }
 
-func (c *Celeritas) createRedisPool() *redis.Pool {
+func (d *Devify) createRedisPool() *redis.Pool {
 	return &redis.Pool{
 		MaxIdle:     50,
 		MaxActive:   10000,
 		IdleTimeout: 240 * time.Second,
 		Dial: func() (redis.Conn, error) {
 			return redis.Dial("tcp",
-				c.config.redis.host,
-				redis.DialPassword(c.config.redis.password))
+				d.config.redis.host,
+				redis.DialPassword(d.config.redis.password))
 		},
 		TestOnBorrow: func(c redis.Conn, t time.Time) error {
 			_, err := c.Do("PING")
@@ -258,7 +258,7 @@ func (c *Celeritas) createRedisPool() *redis.Pool {
 	}
 }
 
-func (c *Celeritas) BuildDSN() string {
+func (d *Devify) BuildDSN() string {
 	var dsn string
 
 	dbType := strings.ToLower(os.Getenv("DATABASE_TYPE"))

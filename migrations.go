@@ -1,4 +1,4 @@
-package celeritas
+package devify
 
 import (
 	"errors"
@@ -12,8 +12,8 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-func (c *Celeritas) MigrateUp(dsn string) error {
-	m, err := migrate.New("file://"+c.RootPath+"/migrations", dsn)
+func (d *Devify) MigrateUp(dsn string) error {
+	m, err := migrate.New("file://"+d.RootPath+"/migrations", dsn)
 	if err != nil {
 		return err
 	}
@@ -25,8 +25,8 @@ func (c *Celeritas) MigrateUp(dsn string) error {
 	return nil
 }
 
-func (c *Celeritas) MigrateDownAll(dsn string) error {
-	m, err := migrate.New("file://"+c.RootPath+"/migrations", dsn)
+func (d *Devify) MigrateDownAll(dsn string) error {
+	m, err := migrate.New("file://"+d.RootPath+"/migrations", dsn)
 	if err != nil {
 		return err
 	}
@@ -38,8 +38,8 @@ func (c *Celeritas) MigrateDownAll(dsn string) error {
 	return nil
 }
 
-func (c *Celeritas) Steps(n int, dsn string) error {
-	m, err := migrate.New("file://"+c.RootPath+"/migrations", dsn)
+func (d *Devify) Steps(n int, dsn string) error {
+	m, err := migrate.New("file://"+d.RootPath+"/migrations", dsn)
 	if err != nil {
 		return err
 	}
@@ -51,8 +51,8 @@ func (c *Celeritas) Steps(n int, dsn string) error {
 	return nil
 }
 
-func (c *Celeritas) MigrateForce(dsn string) error {
-	m, err := migrate.New("file://"+c.RootPath+"/migrations", dsn)
+func (d *Devify) MigrateForce(dsn string) error {
+	m, err := migrate.New("file://"+d.RootPath+"/migrations", dsn)
 	if err != nil {
 		return err
 	}

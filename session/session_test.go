@@ -9,18 +9,18 @@ import (
 )
 
 func TestSession_InitSession(t *testing.T) {
-	c := &Session{
+	d := &Session{
 		CookieLifetime: "100",
 		CookiePersist:  "true",
 		CookieSecure:   "false",
-		CookieName:     "celeritas",
+		CookieName:     "devify",
 		CookieDomain:   "localhost",
 		SessionType:    "cookie",
 	}
 
 	var sm *scs.SessionManager
 
-	session := c.InitSession()
+	session := d.InitSession()
 
 	var sessionKind reflect.Kind
 	var sessionType reflect.Type

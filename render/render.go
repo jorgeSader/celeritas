@@ -38,39 +38,39 @@ type TemplateData struct {
 	Secure          bool
 }
 
-func (c *Render) defaultData(td *TemplateData, r *http.Request) *TemplateData {
-	td.Secure = c.Secure
-	td.ServerName = c.ServerName
-	td.Port = c.Port
+func (d *Render) defaultData(td *TemplateData, r *http.Request) *TemplateData {
+	td.Secure = d.Secure
+	td.ServerName = d.ServerName
+	td.Port = d.Port
 
-	if c.Session != nil && r != nil {
-		if c.Session.Exists(r.Context(), "userID") {
+	if d.Session != nil && r != nil {
+		if d.Session.Exists(r.Context(), "userID") {
 			td.IsAuthenticated = true
 		}
 	}
 	return td
 }
 
-func (c *Render) Page(w http.ResponseWriter, r *http.Request, view string, data, variables interface{}) error {
-	switch strings.ToLower(c.Renderer) {
+func (d *Render) Page(w http.ResponseWriter, r *http.Request, view string, data, variables interface{}) error {
+	switch strings.ToLower(d.Renderer) {
 	case "go":
-		return c.GoPage(w, r, view, data)
+		return d.GoPage(w, r, view, data)
 	case "jet":
-		return c.JetPage(w, r, view, data, variables)
+		return d.JetPage(w, r, view, data, variables)
 	default:
 		return errors.New("no rendering engine specified")
 	}
 }
 
 // GoPage renders a standard Go template using the pre-cached template
-func (c *Render) GoPage(w http.ResponseWriter, r *http.Request, view string, data interface{}) error {
+func (d *Render) GoPage(w http.ResponseWriter, r *http.Request, view string, data interface{}) error {
 	var tc map[string]*template.Template
 	var err error
 
-	if c.UseCache {
-		tc = c.TemplateCache
+	if d.UseCache {
+		tc = d.TemplateCache
 	} else {
-		tc, err = c.CreateTemplateCache()
+		tc, err = d.CreateTemplateCache()
 		if err != nil {
 			log.Printf("Error creating template cache: %v", err)
 			return err
@@ -87,7 +87,7 @@ func (c *Render) GoPage(w http.ResponseWriter, r *http.Request, view string, dat
 	if data != nil {
 		td = data.(*TemplateData)
 	}
-	td = c.defaultData(td, r)
+	td = d.defaultData(td, r)
 
 	buf := new(bytes.Buffer)
 	err = tmpl.Execute(buf, td)
@@ -106,7 +106,7 @@ func (c *Render) GoPage(w http.ResponseWriter, r *http.Request, view string, dat
 }
 
 // JetPage renders a template using the Jet templating engine
-func (c *Render) JetPage(w http.ResponseWriter, r *http.Request, templateName string, data, variables interface{}) error {
+func (d *Render) JetPage(w http.ResponseWriter, r *http.Request, templateName string, data, variables interface{}) error {
 	var vars jet.VarMap
 	if variables == nil {
 		vars = make(jet.VarMap)
@@ -119,9 +119,9 @@ func (c *Render) JetPage(w http.ResponseWriter, r *http.Request, templateName st
 		td = data.(*TemplateData)
 	}
 
-	td = c.defaultData(td, r)
+	td = d.defaultData(td, r)
 
-	jt, err := c.JetViews.GetTemplate(fmt.Sprintf("%s.jet", templateName))
+	jt, err := d.JetViews.GetTemplate(fmt.Sprintf("%s.jet", templateName))
 	if err != nil {
 		log.Println(err)
 		return err
@@ -137,11 +137,11 @@ func (c *Render) JetPage(w http.ResponseWriter, r *http.Request, templateName st
 }
 
 // CreateTemplateCache initializes a template cache by parsing all template files
-func (c *Render) CreateTemplateCache() (map[string]*template.Template, error) {
+func (d *Render) CreateTemplateCache() (map[string]*template.Template, error) {
 	templateCache := make(map[string]*template.Template)
 
-	pathToPages := fmt.Sprintf("%s/views/*.page.tmpl", c.RootPath)
-	pathToLayouts := fmt.Sprintf("%s/views/layouts/*.layout.tmpl", c.RootPath)
+	pathToPages := fmt.Sprintf("%s/views/*.page.tmpl", d.RootPath)
+	pathToLayouts := fmt.Sprintf("%s/views/layouts/*.layout.tmpl", d.RootPath)
 
 	pages, err := filepath.Glob(pathToPages)
 	if err != nil {

@@ -1,7 +1,7 @@
-package celeritas
+package devify
 
 import "net/http"
 
-func (c *Celeritas) SessionLoad(next http.Handler) http.Handler {
-	return c.Session.LoadAndSave(next)
+func (d *Devify) SessionLoad(next http.Handler) http.Handler {
+	return d.Session.LoadAndSave(next)
 }

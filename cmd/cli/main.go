@@ -3,13 +3,13 @@ package main
 import (
 	"errors"
 	"github.com/fatih/color"
-	"github.com/jorgeSader/celeritas"
+	"github.com/jorgeSader/devify"
 	"os"
 )
 
 const version = "0.1.0"
 
-var cel celeritas.Celeritas
+var cel devify.Devify
 
 func main() {
 	arg1, arg2, arg3, err := validateInput()

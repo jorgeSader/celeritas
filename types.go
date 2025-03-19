@@ -1,4 +1,4 @@
-package celeritas
+package devify
 
 import "database/sql"
 

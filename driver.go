@@ -1,4 +1,4 @@
-package celeritas
+package devify
 
 import (
 	"database/sql"
@@ -6,7 +6,7 @@ import (
 	_ "github.com/jackc/pgx/v5"
 )
 
-func (c *Celeritas) OpenDB(dbType, dsn string) (*sql.DB, error) {
+func (d *Devify) OpenDB(dbType, dsn string) (*sql.DB, error) {
 	if dbType == "postgres" || dbType == "postgresql" {
 		dbType = "pgx"
 	}

@@ -1,4 +1,4 @@
-package celeritas
+package devify
 
 import (
 	"fmt"
@@ -22,7 +22,7 @@ type Validation struct {
 
 // Validator creates a new Validation instance from an HTTP request.
 // It parses the request form and initializes the validation state.
-func (c *Celeritas) Validator(r *http.Request) *Validation {
+func (d *Devify) Validator(r *http.Request) *Validation {
 	_ = r.ParseForm() // Ignoring error for simplicity; handle in production if needed
 	return &Validation{
 		Data:   r.Form,

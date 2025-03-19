@@ -1,4 +1,4 @@
-module github.com/jorgeSader/celeritas
+module github.com/jorgeSader/devify
 
 go 1.23.6
 

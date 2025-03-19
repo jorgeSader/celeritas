@@ -34,7 +34,7 @@ func TestMain(m *testing.M) {
 	// Initialize test cache
 	testRedisCache = RedisCache{
 		Conn:   &pool,
-		Prefix: "test-celeritas",
+		Prefix: "test-devify",
 	}
 
 	// Ensure pool is closed after tests

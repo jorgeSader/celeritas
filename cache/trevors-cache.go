@@ -66,7 +66,7 @@ package cache
 //	var item Entry
 //	b := bytes.NewBuffer(data)
 //	d := gob.NewDecoder(b)
-//	err := d.Decode(&item)
+//	err := c.Decode(&item)
 //	if err != nil {
 //		return nil, err
 //	}
@@ -224,7 +224,7 @@ package cache
 //}
 //
 //// getKeys retrieves all Redis keys matching the given pattern using SCAN.
-//// The pattern is automatically appended with ":*" wildcard.
+//// The pattern is automatically appended with ":*" wildcarc.
 //// Returns the matched keys or an error if the operation fails.
 //func (c *RedisCache) getKeys(pattern string) ([]string, error) {
 //	conn := c.Conn.Get()
